@@ -1,0 +1,44 @@
+class Solution:
+    def minWindow(self, s: str, t: str) -> str:
+        '''
+        There are a few tricks here:
+        1) Sliding window to reduce the overall loop to having O(n) operations
+        2) Tracking the chars in the target and sliding window in a dictionary O(1) search add delete
+        3*) A huge problem would be if we needed to compare the whole target and window dictionaries on each interation
+            this would result in O(n*k) operations. However we can maintain a state variable in constant time per operation to 
+                track how many letters from the target. Then, if this missing variable goes to zero, we have a matching window
+        4) Once you have a good window, reduce the window until you don't have a valid window
+        '''
+        t_count = {}
+        for letter in t:
+            if letter not in t_count:
+                t_count[letter] = 0
+            t_count[letter] += 1
+        print('tcount', t_count)
+        
+        start = 0
+        missing = len(t)
+        s_count = {k:0 for k in t_count}
+        min_window_len = float('inf')
+        
+        for i, letter in enumerate(s):
+            if letter in s_count:
+                if s_count[letter] < t_count[letter]:
+                    missing -= 1
+                s_count[letter] += 1
+            while missing == 0:
+                win_length = i - start + 1
+                if win_length < min_window_len:
+                    min_window_len = win_length
+                    min_window = (start, i)
+                start_letter = s[start]
+                if start_letter in s_count:
+                    if s_count[start_letter] == t_count[start_letter]:
+                        missing += 1
+                    s_count[start_letter] -= 1
+                start += 1
+        
+        if min_window_len == float('inf'):
+            return ''
+        return s[min_window[0]:min_window[1]+1]
+            
